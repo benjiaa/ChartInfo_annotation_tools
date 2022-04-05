@@ -1,5 +1,6 @@
 
 import math
+import numpy as np
 
 from .tick_info import TickInfo
 from scipy import interpolate
@@ -7,6 +8,7 @@ from scipy import interpolate
 class AxisValues:
     ValueTypeCategorical = 0
     ValueTypeNumerical = 1
+    ValueTypeNumericalInt = 2
 
     ScaleNone = 0
     ScaleLinear = 1
@@ -84,6 +86,8 @@ class AxisValues:
     def get_description(self):
         if self.values_type == AxisValues.ValueTypeNumerical:
             value_type_str = "numerical"
+        elif self.values_type == AxisValues.ValueTypeNumericalInt:
+            value_type_str = "numericalint"
         elif self.values_type == AxisValues.ValueTypeCategorical:
             value_type_str = "categorical"
         else:
@@ -115,6 +119,8 @@ class AxisValues:
 
         if value_type_str == "numerical":
             value_type = AxisValues.ValueTypeNumerical
+        elif value_type_str == "numericalint":
+            value_type = AxisValues.ValueTypeNumericalInt
         elif value_type_str == "categorical":
             value_type = AxisValues.ValueTypeCategorical
         else:
@@ -363,7 +369,7 @@ class AxisValues:
 
     @staticmethod
     def Project(axes, axis_values, vertical_axis, pixel_value):
-        if axis_values.values_type == AxisValues.ValueTypeNumerical:
+        if axis_values.values_type == AxisValues.ValueTypeNumerical or axis_values.values_type == AxisValues.ValueTypeNumericalInt:
             # GET origin value
             # use X or Y origin based on axis being vertical or horizontal
             bb_x1, bb_y1, bb_x2, bb_y2 = axes.bounding_box
@@ -398,7 +404,10 @@ class AxisValues:
 
                 # interpolate value ...
                 f_int = interpolate.interp1d(interp_x, interp_y, 'linear', fill_value='extrapolate')
-                return float(f_int(rel_pixel_value))
+                if axis_values.values_type == axis_values.ValueTypeNumericalInt:
+                    return round(float(f_int(rel_pixel_value)),1)
+                else:
+                    return float(f_int(rel_pixel_value))
             elif axis_values.scale_type == AxisValues.ScaleLogarithmic:
                 if 0.0 in interp_y:
                     pos = interp_y.index(0.0)
@@ -424,9 +433,6 @@ class AxisValues:
 
     @staticmethod
     def FindClosestValue(axes, axis_values, vertical_axis, pixel_value):
-        '''
-        for tomorrow benji: something is wrong with the way this gets called when you've got a categorical horizontal axis
-        '''
         label_positions = axis_values.get_tick_type_value_positions(vertical_axis, axes.tick_labels)
 
         if len(label_positions) == 0:

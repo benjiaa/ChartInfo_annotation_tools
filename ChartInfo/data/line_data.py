@@ -61,7 +61,7 @@ class LineData:
             # use lower axis as independent variable axis (common)
             x_axis = chart_info.axes.x1_axis
 
-        if ((x_axis.values_type == AxisValues.ValueTypeNumerical and x_axis.scale_type == AxisValues.ScaleNone) or
+        if (((x_axis.values_type == AxisValues.ValueTypeNumerical  or x_axis.values_type == AxisValues.ValueTypeNumericalInt)and x_axis.scale_type == AxisValues.ScaleNone) or
             (x_axis.values_type == AxisValues.ValueTypeCategorical)):
             # only sample at known points (label values on the axis)
             axis_ticks = x_axis.ticks_with_labels()
