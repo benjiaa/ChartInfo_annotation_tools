@@ -1,6 +1,7 @@
-
+from numpy import array, unique
 from .dot_values import DotValues
 from .axis_values import AxisValues
+from .axes_info import AxesInfo
 
 class DotData:
     DataVersion = 1.0
@@ -39,9 +40,6 @@ class DotData:
             return False
 
     def parse_data(self, chart_info):
-        print('-----------------')
-        print('PARSE_DATA IS GETTING CALLED HERE')
-        print('-----------------')        
         # now infer data quantities based on dot data ...
         # this is very similar to line charts ....
         x1, y1, x2, y2 = chart_info.axes.bounding_box
@@ -116,7 +114,7 @@ class DotData:
                 }
                 current_dot_points.append(line_data_point)
 
-                if x_axis.values_type == AxisValues.ValueTypeNumerical:
+                if x_axis.values_type == AxisValues.ValueTypeNumerical or x_axis.values_type == AxisValues.ValueTypeNumericalInt:
                     proj_x_val = AxisValues.Project(chart_info.axes, x_axis, False, line_x_pixel)
                 else:
                     # categorical x axis ... find closest category
@@ -128,19 +126,12 @@ class DotData:
                 # get Y value on chart space ...
                 # Y-1 axis (Common)
                 if chart_info.axes.y1_axis is not None:
-                    if chart_info.axes.y1_axis.values_type == AxisValues.ValueTypeNumerical:
+                    if chart_info.axes.y1_axis.values_type == AxisValues.ValueTypeNumerical or chart_info.axes.y1_axis.values_type == AxisValues.ValueTypeNumericalInt:
                         proj_y_val = AxisValues.Project(chart_info.axes, chart_info.axes.y1_axis, True, line_y_pixel)
                     else:
                         # categorical x axis ... find closest category
                         proj_y_val = AxisValues.FindClosestValue(chart_info.axes, chart_info.axes.y1_axis, True, line_y_pixel)
-                    print('projected y val:',proj_y_val) 
                     data_series_point["y"] = proj_y_val
-                # Y-2 axis (Rare)
-                # if chart_info.axes.y2_axis is not None:
-                #     proj_y_val = AxisValues.Project(chart_info.axes, chart_info.axes.y2_axis, True, line_y_pixel)
-                #     data_series_point["y2"] = proj_y_val
-                else: 
-                    print("Transfer to .json not yet implemented for single-axis dot graphs.")
 
                 current_data_series.append(data_series_point)
 
@@ -148,6 +139,22 @@ class DotData:
                 series_name = "[unnamed data series #{0:d}]".format(series_idx)
             else:
                 series_name = series_text.value
+            # if there's a single-axis vertical dot graph, collate the points  
+            if chart_info.axes.x1_axis and chart_info.axes.y1_axis is None:
+                collated_data_series = [] 
+                # plural data series: all of the points in the chart (not unique)
+                plural_data_series = [list(each.values())[0] for each in current_data_series] 
+                # tickvalues: list representation of the tick values on x axis
+                tickvalues = [each.value for each in chart_info.axes.get_axis_labels(AxesInfo.AxisX1)]
+                # values / counts: values and frequency of values in the chart
+                values, counts = unique(array(plural_data_series), return_counts=True)
+                counts = [int(item) for item in counts]
+                for each in tickvalues:
+                    if each in values:
+                        collated_data_series.append({each : counts[list(values).index(each)]})
+                    else:
+                        collated_data_series.append({each : 0})
+                current_data_series = collated_data_series
 
             final_data_series = {
                 "data": current_data_series,

@@ -113,7 +113,7 @@ class ScatterData:
                 }
                 current_scatter_points.append(line_data_point)
 
-                if x_axis.values_type == AxisValues.ValueTypeNumerical:
+                if x_axis.values_type == AxisValues.ValueTypeNumerical or x_axis.values_type == AxisValues.ValueTypeNumericalInt:
                     proj_x_val = AxisValues.Project(chart_info.axes, x_axis, False, line_x_pixel)
                 else:
                     # categorical x axis ... find closest category

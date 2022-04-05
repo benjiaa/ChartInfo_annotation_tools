@@ -459,7 +459,7 @@ class ChartAxesAnnotator(BaseImageAnnotator):
         self.container_info_buttons.append(self.lbl_info_axis_type_title)
 
 
-        self.lbx_info_axis_type = ScreenTextlist("lbx_info_axis_type", (button_2_width, 90), 18,
+        self.lbx_info_axis_type = ScreenTextlist("lbx_info_axis_type", (button_2_width, 135), 18,
                                                  back_color=(255, 255, 255), option_color=(0, 0, 0),
                                                  selected_back=(50, 80, 120), selected_color=(255, 255, 255))
         self.lbx_info_axis_type.position = (button_2_left, self.lbl_info_axis_type_title.get_bottom() + 10)
@@ -685,6 +685,7 @@ class ChartAxesAnnotator(BaseImageAnnotator):
         self.lbx_info_axis_type.clear_options()
         self.lbx_info_axis_type.add_option(str(AxisValues.ValueTypeNumerical), "Numerical")
         self.lbx_info_axis_type.add_option(str(AxisValues.ValueTypeCategorical), "Categorical")
+        self.lbx_info_axis_type.add_option(str(AxisValues.ValueTypeNumericalInt), "Numerical (Integer)")
 
         self.lbx_info_ticks_type.clear_options()
         self.lbx_info_ticks_type.add_option(str(AxisValues.TicksTypeMarkers), "Markers")
