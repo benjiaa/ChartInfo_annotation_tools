@@ -275,7 +275,6 @@ class ChartMainAnnotator(Screen):
         print("APPLICATION FINISHED")
 
     def update_annotation_times(self, chart_annotation_times):
-        print("HERE!!")
         self.annotation_times.update_stats(chart_annotation_times)
 
     def refresh_page(self):
